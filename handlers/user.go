@@ -83,3 +83,26 @@ func Login(ctx *fiber.Ctx) error {
 		"message": "success",
 	})
 }
+
+func Profile(ctx *fiber.Ctx) error {
+	cookie := ctx.Cookies("jwt")
+
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secretKey), nil
+	})
+
+	if err != nil {
+		ctx.Status(fiber.StatusUnauthorized)
+		return ctx.JSON(fiber.Map{
+			"message": "unauthenticated",
+		})
+	}
+
+	claims := token.Claims.(*jwt.StandardClaims)
+
+	var user models.User
+
+	database.DB.Where("id = ?", claims.Issuer).First(&user)
+
+	return ctx.JSON(user)
+}
