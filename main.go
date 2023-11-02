@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/mehmet-dogru/go-fiber-api/database"
@@ -10,7 +11,10 @@ import (
 
 func main() {
 	database.ConnectDB()
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		JSONEncoder: json.Marshal,
+		JSONDecoder: json.Unmarshal,
+	})
 
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     "http://localhost:5173",
